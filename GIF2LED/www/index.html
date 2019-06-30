@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>H-Bridge Sequence setter</title>
+  <link rel="stylesheet" type="text/css" href="./spectrum/spectrum.css">
+  <script type="text/javascript" src="./spectrum/colorwheel.min.js"></script>
+</head>
+
+<body>
+  <form id="docform" onsubmit="docForm()">
+    Frames: <input type="text" id="frames" value="3"><br>
+    Delay: <input type="text" id="delay" value="6"><br>
+    Filename: <input type="text" id="filename" value="1"><br>
+    <input type="submit" value="Update">
+  </form>
+  <br><br><br>
+  <form id="devform" onsubmit="addDevice()">
+    Frame Width: <input type="text" id="width" value="1"><br>
+    Frame Height: <input type="text" id="height" value="60"><br>
+    Device Type:
+    <select name="device" id="type">
+      <option value="1">PWN</option>
+      <option value="2">NeoPixel</option>
+    </select>
+    <br>
+    Pin: <input type="text" id="pin" value="2"><br>
+    <input type="submit" value="Add Device">
+  </form>
+
+  <div class="container">
+      <input type='text' id="full"/>
+  </div>
+  <script type="text/javascript">
+    $("#update").click (function() {
+        //console.log($("#full").spectrum("option", "palette"));
+        $("#full").spectrum("option", "palette", [
+            ["red", "green", "blue"]    
+        ]);
+    });
+    
+    $("#full").spectrum({
+        color: "#ECC",
+        flat: true,
+        showInput: true,
+        className: "full-spectrum",
+        showInitial: true,
+        showPalette: true,
+        showSelectionPalette: true,
+        maxPaletteSize: 10,
+        preferredFormat: "hex",
+        localStorageKey: "spectrum.savedcolor",
+        move: function (color) {
+            
+        },
+        show: function () {
+        
+        },
+        beforeShow: function () {
+        
+        },
+        hide: function () {
+        
+        },
+        change: function() {
+
+        },
+        palette: [
+            ["rgb(0, 0, 0)", "rgb(67, 67, 67)", "rgb(102, 102, 102)",
+            "rgb(204, 204, 204)", "rgb(217, 217, 217)","rgb(255, 255, 255)"],
+            ["rgb(152, 0, 0)", "rgb(255, 0, 0)", "rgb(255, 153, 0)", "rgb(255, 255, 0)", "rgb(0, 255, 0)",
+            "rgb(0, 255, 255)", "rgb(74, 134, 232)", "rgb(0, 0, 255)", "rgb(153, 0, 255)", "rgb(255, 0, 255)"], 
+            ["rgb(230, 184, 175)", "rgb(244, 204, 204)", "rgb(252, 229, 205)", "rgb(255, 242, 204)", "rgb(217, 234, 211)", 
+            "rgb(208, 224, 227)", "rgb(201, 218, 248)", "rgb(207, 226, 243)", "rgb(217, 210, 233)", "rgb(234, 209, 220)", 
+            "rgb(221, 126, 107)", "rgb(234, 153, 153)", "rgb(249, 203, 156)", "rgb(255, 229, 153)", "rgb(182, 215, 168)", 
+            "rgb(162, 196, 201)", "rgb(164, 194, 244)", "rgb(159, 197, 232)", "rgb(180, 167, 214)", "rgb(213, 166, 189)", 
+            "rgb(204, 65, 37)", "rgb(224, 102, 102)", "rgb(246, 178, 107)", "rgb(255, 217, 102)", "rgb(147, 196, 125)", 
+            "rgb(118, 165, 175)", "rgb(109, 158, 235)", "rgb(111, 168, 220)", "rgb(142, 124, 195)", "rgb(194, 123, 160)",
+            "rgb(166, 28, 0)", "rgb(204, 0, 0)", "rgb(230, 145, 56)", "rgb(241, 194, 50)", "rgb(106, 168, 79)",
+            "rgb(69, 129, 142)", "rgb(60, 120, 216)", "rgb(61, 133, 198)", "rgb(103, 78, 167)", "rgb(166, 77, 121)",
+            "rgb(91, 15, 0)", "rgb(102, 0, 0)", "rgb(120, 63, 4)", "rgb(127, 96, 0)", "rgb(39, 78, 19)", 
+            "rgb(12, 52, 61)", "rgb(28, 69, 135)", "rgb(7, 55, 99)", "rgb(32, 18, 77)", "rgb(76, 17, 48)"]
+        ]
+    });
+    </script>
+    <div id="mainWindow">
+    </div>
+  <br>
+  <button name="prev" onclick="prev()"><</button>
+  Frame <div id="framedisplay" style="display: inline;">1</div>
+  <button name="next" onclick="next()">></button>
+  <br>
+  <button name="upload" onclick="sendframes()">Upload</button>
+  <script type="text/javascript" src="main.js"></script>
+  <div>
+      <canvas id="c"></canvas>
+  </div>
+  <div style="margin: 10px 0;">
+    <input id="url" type="text"/>
+    <button onclick="loadGIF()">Load</button>
+  </div>
+  <div style="margin-bottom: 10px;">
+    <input id="grayscale" type="checkbox" onchange="bEdgeDetect = !bEdgeDetect"> Edge Detect
+    <input id="invert" type="checkbox" onchange="bInvert = !bInvert;"> Invert Colours
+    <input id="grayscale" type="checkbox" onchange="bGrayscale = !bGrayscale"> Grayscale
+  </div>
+  <div>
+    <input id="pixels" type="range" min="0" max="100" step="1" value="100" oninput="pixelPercent = value;"> Pixelate Amount
+  </div>
+  <script src="./gif/gif.min.js"></script>
+</body>
+
+</html>
