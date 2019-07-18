@@ -1,114 +1,160 @@
 <!DOCTYPE html>
 <html>
-
 <head>
-  <meta charset="UTF-8">
-  <title>H-Bridge Sequence setter</title>
-  <link rel="stylesheet" type="text/css" href="./spectrum/spectrum.css">
-  <script type="text/javascript" src="./spectrum/colorwheel.min.js"></script>
+<meta charset="UTF-8">
+<title>GIF2LED</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.js"></script>
+<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+<link rel="stylesheet" type="text/css" href="./spectrum/spectrum.css">
+<script type="text/javascript" src="./spectrum/spectrum.js"></script>
+<link rel="stylesheet" type="text/css" href="main.css">
+<script src="./gif/dist/gifuct-js.js"></script>
+<script src="./gif/demo.js"></script>
+<script type="text/javascript" src="main.js"></script>
 </head>
-
 <body>
-  <form id="docform" onsubmit="docForm()">
-    Frames: <input type="text" id="frames" value="3"><br>
-    Delay: <input type="text" id="delay" value="6"><br>
-    Filename: <input type="text" id="filename" value="1"><br>
-    <input type="submit" value="Update">
-  </form>
-  <br><br><br>
-  <form id="devform" onsubmit="addDevice()">
-    Frame Width: <input type="text" id="width" value="1"><br>
-    Frame Height: <input type="text" id="height" value="60"><br>
-    Device Type:
-    <select name="device" id="type">
-      <option value="1">PWN</option>
-      <option value="2">NeoPixel</option>
-    </select>
-    <br>
-    Pin: <input type="text" id="pin" value="2"><br>
-    <input type="submit" value="Add Device">
-  </form>
-
-  <div class="container">
-      <input type='text' id="full"/>
-  </div>
-  <script type="text/javascript">
-    $("#update").click (function() {
-        //console.log($("#full").spectrum("option", "palette"));
-        $("#full").spectrum("option", "palette", [
-            ["red", "green", "blue"]    
-        ]);
-    });
-    
-    $("#full").spectrum({
-        color: "#ECC",
-        flat: true,
-        showInput: true,
-        className: "full-spectrum",
-        showInitial: true,
-        showPalette: true,
-        showSelectionPalette: true,
-        maxPaletteSize: 10,
-        preferredFormat: "hex",
-        localStorageKey: "spectrum.savedcolor",
-        move: function (color) {
-            
-        },
-        show: function () {
-        
-        },
-        beforeShow: function () {
-        
-        },
-        hide: function () {
-        
-        },
-        change: function() {
-
-        },
-        palette: [
-            ["rgb(0, 0, 0)", "rgb(67, 67, 67)", "rgb(102, 102, 102)",
-            "rgb(204, 204, 204)", "rgb(217, 217, 217)","rgb(255, 255, 255)"],
-            ["rgb(152, 0, 0)", "rgb(255, 0, 0)", "rgb(255, 153, 0)", "rgb(255, 255, 0)", "rgb(0, 255, 0)",
-            "rgb(0, 255, 255)", "rgb(74, 134, 232)", "rgb(0, 0, 255)", "rgb(153, 0, 255)", "rgb(255, 0, 255)"], 
-            ["rgb(230, 184, 175)", "rgb(244, 204, 204)", "rgb(252, 229, 205)", "rgb(255, 242, 204)", "rgb(217, 234, 211)", 
-            "rgb(208, 224, 227)", "rgb(201, 218, 248)", "rgb(207, 226, 243)", "rgb(217, 210, 233)", "rgb(234, 209, 220)", 
-            "rgb(221, 126, 107)", "rgb(234, 153, 153)", "rgb(249, 203, 156)", "rgb(255, 229, 153)", "rgb(182, 215, 168)", 
-            "rgb(162, 196, 201)", "rgb(164, 194, 244)", "rgb(159, 197, 232)", "rgb(180, 167, 214)", "rgb(213, 166, 189)", 
-            "rgb(204, 65, 37)", "rgb(224, 102, 102)", "rgb(246, 178, 107)", "rgb(255, 217, 102)", "rgb(147, 196, 125)", 
-            "rgb(118, 165, 175)", "rgb(109, 158, 235)", "rgb(111, 168, 220)", "rgb(142, 124, 195)", "rgb(194, 123, 160)",
-            "rgb(166, 28, 0)", "rgb(204, 0, 0)", "rgb(230, 145, 56)", "rgb(241, 194, 50)", "rgb(106, 168, 79)",
-            "rgb(69, 129, 142)", "rgb(60, 120, 216)", "rgb(61, 133, 198)", "rgb(103, 78, 167)", "rgb(166, 77, 121)",
-            "rgb(91, 15, 0)", "rgb(102, 0, 0)", "rgb(120, 63, 4)", "rgb(127, 96, 0)", "rgb(39, 78, 19)", 
-            "rgb(12, 52, 61)", "rgb(28, 69, 135)", "rgb(7, 55, 99)", "rgb(32, 18, 77)", "rgb(76, 17, 48)"]
-        ]
-    });
-    </script>
-    <div id="mainWindow">
+<div id="topbar">GIF2LED</div>
+<div class="steps">
+  <div class="stpone stpcont">
+    <h1>Step One: Load your GIF</h1>
+    <div id="gifpreview">
+      <canvas id="gcanvas"></canvas>
     </div>
-  <br>
-  <button name="prev" onclick="prev()"><</button>
-  Frame <div id="framedisplay" style="display: inline;">1</div>
-  <button name="next" onclick="next()">></button>
-  <br>
-  <button name="upload" onclick="sendframes()">Upload</button>
-  <script type="text/javascript" src="main.js"></script>
-  <div>
-      <canvas id="c"></canvas>
+    <div id="stponeui">
+      <input id="url" type="text"/>
+      <button onclick="loadGIF()">Load</button>
+      <input type="file" id="files" name="file" />
+      <br>
+    </div>
+    <!--    <button onclick="playpause()">Play/Pause</button>--> 
   </div>
-  <div style="margin: 10px 0;">
-    <input id="url" type="text"/>
-    <button onclick="loadGIF()">Load</button>
+  <div class="stptwo stpcont">
+    <h1>Step Two: Add Device</h1>
+    <div id="stptwoui">
+      <div class="grid-container">
+        <div class="InputL"> GIF Clipping area for device:<br>
+          <label for="clipx">x:</label>
+          <input type="text" id="clipx" value="0">
+          <br>
+          <label for="clipy">y:</label>
+          <input type="text" id="clipy" value="0">
+          <br>
+          <label for="clipw">width:</label>
+          <input type="text" id="clipw" value="0">
+          <br>
+          <label for="cliph">height:</label>
+          <input type="text" id="cliph" value="0">
+          <br>
+          <input type="button" value="Set" onclick="setclipping()">
+          <br>
+        </div>
+        <div class="InputR"> Device Display Properties:<br>
+          <label for="dwidth">Frame Width:</label>
+          <input type="text" id="dwidth" value="1">
+          <br>
+          <label for="dheight">Frame Height:</label>
+          <input type="text" id="dheight" value="60">
+          <br>
+          <label for="device">Device Type:</label>
+          <select name="device" id="type">
+            <option value="2">NeoPixel</option>
+          </select>
+          <br>
+          <label for="pin">Pin:</label>
+          <input type="text" id="pin" value="2">
+          <br>
+        </div>
+        <div class="UploadB">
+          <button id="adddev" onclick="addDevice()">Add Device</button>
+        </div>
+      </div>
+    </div>
   </div>
-  <div style="margin-bottom: 10px;">
-    <input id="grayscale" type="checkbox" onchange="bEdgeDetect = !bEdgeDetect"> Edge Detect
-    <input id="invert" type="checkbox" onchange="bInvert = !bInvert;"> Invert Colours
-    <input id="grayscale" type="checkbox" onchange="bGrayscale = !bGrayscale"> Grayscale
+  <div class="stpthr stpcont">
+    <h1>Step Three: Edit and upload</h1>
+    <div id="mainWindow"> </div>
+    <br>
+    <div class="center">
+      <div id="framenav">
+        <button name="prev" onclick="prev()"><</button>
+        Frame
+        <div id="framedisplay" style="display: inline;">1</div>
+        <button name="next" onclick="next()">></button>
+      </div>
+    </div>
+    <div id="spcontainer">
+      <input type='text' id="full"/>
+    </div>
+    <script type="text/javascript">
+        $("#update").click (function() {
+            //console.log($("#full").spectrum("option", "palette"));
+            $("#full").spectrum("option", "palette", [
+                ["red", "green", "blue"]    
+            ]);
+        });
+        
+        $("#full").spectrum({
+            color: "#ECC",
+            flat: true,
+            showInput: true,
+            className: "full-spectrum",
+            showInitial: true,
+            showPalette: true,
+            showSelectionPalette: true,
+            maxPaletteSize: 10,
+            preferredFormat: "hex",
+            localStorageKey: "spectrum.savedcolor",
+            move: function (color) {
+            },
+            show: function () {
+            
+            },
+            beforeShow: function () {
+            
+            },
+            hide: function () {
+            
+            },
+            change: function() {
+    
+            },
+            palette: [
+                ["rgb(0, 0, 0)", "rgb(67, 67, 67)", "rgb(102, 102, 102)",
+                "rgb(204, 204, 204)", "rgb(217, 217, 217)","rgb(255, 255, 255)"],
+                ["rgb(152, 0, 0)", "rgb(255, 0, 0)", "rgb(255, 153, 0)", "rgb(255, 255, 0)", "rgb(0, 255, 0)",
+                "rgb(0, 255, 255)", "rgb(74, 134, 232)", "rgb(0, 0, 255)", "rgb(153, 0, 255)", "rgb(255, 0, 255)"], 
+                ["rgb(230, 184, 175)", "rgb(244, 204, 204)", "rgb(252, 229, 205)", "rgb(255, 242, 204)", "rgb(217, 234, 211)", 
+                "rgb(208, 224, 227)", "rgb(201, 218, 248)", "rgb(207, 226, 243)", "rgb(217, 210, 233)", "rgb(234, 209, 220)", 
+                "rgb(221, 126, 107)", "rgb(234, 153, 153)", "rgb(249, 203, 156)", "rgb(255, 229, 153)", "rgb(182, 215, 168)", 
+                "rgb(162, 196, 201)", "rgb(164, 194, 244)", "rgb(159, 197, 232)", "rgb(180, 167, 214)", "rgb(213, 166, 189)", 
+                "rgb(204, 65, 37)", "rgb(224, 102, 102)", "rgb(246, 178, 107)", "rgb(255, 217, 102)", "rgb(147, 196, 125)", 
+                "rgb(118, 165, 175)", "rgb(109, 158, 235)", "rgb(111, 168, 220)", "rgb(142, 124, 195)", "rgb(194, 123, 160)",
+                "rgb(166, 28, 0)", "rgb(204, 0, 0)", "rgb(230, 145, 56)", "rgb(241, 194, 50)", "rgb(106, 168, 79)",
+                "rgb(69, 129, 142)", "rgb(60, 120, 216)", "rgb(61, 133, 198)", "rgb(103, 78, 167)", "rgb(166, 77, 121)",
+                "rgb(91, 15, 0)", "rgb(102, 0, 0)", "rgb(120, 63, 4)", "rgb(127, 96, 0)", "rgb(39, 78, 19)", 
+                "rgb(12, 52, 61)", "rgb(28, 69, 135)", "rgb(7, 55, 99)", "rgb(32, 18, 77)", "rgb(76, 17, 48)"]
+            ]
+        });
+        </script>
+    <div id="stpthrui">
+      <div class="grid-container">
+        <div class="InputL">
+          <input type="hidden" id="frames" value="0">
+        </div>
+        <div class="InputR">
+          <label for="delay">Delay:</label>
+          <input type="text" id="delay" value="6">
+          <br>
+          <!--<label for="filename">Filename:</label>-->
+          <input type="hidden" id="filename" value="autoplay">
+        </div>
+        <div class="UploadB">
+          <button id="upload" onclick="sendframes()">Upload</button>
+        </div>
+      </div>
+    </div>
   </div>
-  <div>
-    <input id="pixels" type="range" min="0" max="100" step="1" value="100" oninput="pixelPercent = value;"> Pixelate Amount
-  </div>
-  <script src="./gif/gif.min.js"></script>
+</div>
 </body>
-
 </html>

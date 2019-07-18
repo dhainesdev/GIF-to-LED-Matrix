@@ -1,0 +1,86 @@
+#topbar {
+    background-color: #2699FB;
+    line-height: 5em;
+    color: #FFF;
+    padding-left: 1.5em;
+}
+.stpcont {
+	box-shadow: 2px 2px 7px -1px rgba(0,0,0,0.75);
+	padding: 1em;
+	margin: 2em;
+}
+.stpcont h1 {
+	font-size: 1em;
+}
+.device {
+}
+#spcontainer {
+	width: 200px;
+	position:absolute;
+	display:none;
+}
+#gifpreview {
+	padding-bottom: 1em;
+}
+#gcanvas {
+	position:absolute;
+	pointer-events: none;
+}
+#clippingdiv {
+	z-index: 99;
+}
+#stptwoui {
+	padding: 0 -2.5em;
+}
+#stpthrui {
+	padding: 0 -2.5em;
+}
+#adddev{
+	float: right;
+}
+#framenav{
+  display: inline-block;
+  vertical-align: middle;
+}
+.center{
+	text-align: center;	
+}
+#upload{
+	float: right;
+}
+.grid-container {
+  width: 100%;
+  display: grid;
+  grid-template-columns: .2fr 3fr 0.6fr 3fr 1fr;
+  grid-template-rows: 0.4fr 1.8fr 0.8fr;
+  grid-template-areas: ". . . . ." ". InputL . InputR ." ". . . . UploadB";
+}
+
+.InputL { grid-area: InputL; }
+
+.InputR { grid-area: InputR; }
+
+.UploadB { grid-area: UploadB; }
+
+.steps {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-areas: "stpone" "stptwo" "stpthr";
+  margin: 0 auto;
+  max-width: 1024px;
+  min-width: 800px;
+}
+
+.stpone { 
+  grid-area: stpone;
+}
+
+.stptwo {
+  display:none;
+  grid-area: stptwo;
+}
+
+.stpthr {
+  display:none;
+  grid-area: stpthr;
+}

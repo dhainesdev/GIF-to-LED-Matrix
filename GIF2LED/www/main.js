@@ -1,9 +1,10 @@
 
-var frames, width, height, delay, filename, device, pin;
+var frames, width, height, delay, filename, device, pin, devman;
+
+//GIF Frames
+var genframes = [];
 
 function init(){
-    document.getElementById("docform").addEventListener('submit', function(event){event.preventDefault();});
-    document.getElementById("devform").addEventListener('submit', function(event){event.preventDefault();});
     // Set up touch events for mobile, etc
     window.addEventListener("touchmove", function(e) {
         var touch = e.touches[0];
@@ -14,12 +15,25 @@ function init(){
         window.dispatchEvent(mouseEvent);
     }, false);
     window.addEventListener("resize", function() {
+		positionPicker();
+		$('#clippingdiv').trigger('resize')
     });
     window.addEventListener("scroll", function() {
+		positionPicker();
     });
+	devman = new DeviceManager();
 }
 window.addEventListener("load", init, false);
 
+
+function positionPicker(){
+		var stpthr = $(".stpthr");
+		var sctop = $(window).scrollTop();
+		var offst = stpthr.offset();
+		var w = stpthr.width();
+		var top = Math.max(sctop, offst.top);
+		$("#spcontainer").css("position", "absolute").css("top", top+"px").css("left", offst.left+w+30+"px");	
+}
 
 function concatTypedArrays(a, b) { // a, b TypedArray of same type
     var c = new (a.constructor)(a.length + b.length);
@@ -65,34 +79,38 @@ class Neopixel extends Device {
         this.mdown = -1;
         var elem = document.createElement("canvas");
         elem.setAttribute("id", id);
+		elem.setAttribute("class", "device");
         holder.appendChild(elem);
         this.canvas = document.getElementById(id);
         this.ctx = this.canvas.getContext('2d');
+		//edit/paint vars
+		this.flag = false;
     }
-    createframes(number, width, height){
+    createframes(number, width, height, clip){
         this.width = width;
         this.height = height;
         this.frameData = [];
         for (var x=0; x<number; x++){
-            this.frameData[x] = new OffscreenCanvas(width, height);
+            this.frameData[x] = document.createElement('canvas');
+			this.frameData[x].width = width;
+			this.frameData[x].height = height;
+			
             var ictx = this.frameData[x].getContext("2d");
-            ictx.fillStyle = '#000000';
-            ictx.fillRect(0, 0, width, height);
+            //ictx.fillStyle = '#000000';
+            //ictx.fillRect(0, 0, width, height);
+            ictx.drawImage(genframes[x], clip.x, clip.y, clip.w, clip.h, 0, 0, width, height);
         }
-        console.log("Frames created");
     }
     draw(frame){
         this.currentFrame = frame;
-        // if(height<width){
-        //     var windowW = this.canvas.width  = Math.min(window.innerWidth, 800);//800 max seems reasonable
-        //     var windowH = this.canvas.height = Math.min(windowW*(height/width), 800);
-        // }else{
-        //     var windowH = this.canvas.height = Math.min(window.innerWidth, 800);
-        //     var windowW = this.canvas.width  = Math.min(Math.max(windowH*(width/height), 10), 800);
-        // }
-        this.canvas.height = 800;
-        this.canvas.width = 800;
-        this.ctx.drawImage(this.frameData[frame], 0, 0, this.frameData[frame].width, this.frameData[frame].height, 0, 0, 800, 800);
+         if(this.height<this.width){
+             var windowW = this.canvas.width  = Math.max(Math.min(window.innerWidth, 800),10);//800 max seems reasonable
+             var windowH = this.canvas.height = Math.min(windowW*(this.height/this.width), 800);
+         }else{
+             var windowH = this.canvas.height = Math.min(window.innerWidth, 800);
+             var windowW = this.canvas.width  = Math.min(Math.max(windowH*(this.width/this.height), 10), 800);
+         }
+        this.ctx.drawImage(this.frameData[frame], 0, 0, this.frameData[frame].width, this.frameData[frame].height, 0, 0, windowW, windowH);
     }
     data(frame){
         if (typeof this.frameData[frame] == 'undefined'){
@@ -117,24 +135,34 @@ class Neopixel extends Device {
         var blobyhill = new Blob([binary.buffer], {type: 'application/octet-stream'});
         return blobyhill
       }
-      edit(mx, my, color){
-        var frame = this.currentFrame;
-        const [r, g, b] = color.match(/\w\w/g).map(x => parseInt(x, 16));
+      edit(mx, my, color, res){
+		var frame = this.currentFrame;
         var width = this.frameData[frame].width;
         var height = this.frameData[frame].height;
         var ectx = this.frameData[frame].getContext("2d");
         var pixels = ectx.getImageData(0, 0, width, height);
         var pixelData = pixels.data;
-        //row multiplier
+		//row multiplier
         var rowM = Math.floor(width) * 4;
         //cordinates to edit
         var x = Math.floor((width/this.canvas.width)*mx);
         var y = Math.floor((height/this.canvas.height)*my);
-        pixelData[x*4+(y*rowM)] = r;
-        pixelData[x*4+(y*rowM)+1] = g;
-        pixelData[x*4+(y*rowM)+2] = b;
-        ectx.putImageData(pixels, 0, 0);
-        this.draw(this.currentFrame);
+		const [r, g, b] = color.match(/\w\w/g).map(x => parseInt(x, 16));
+		if (res == 'down') {
+            this.flag = true;
+        }
+        if (res == 'up' || res == "out") {
+            this.flag = false;
+        }
+        if (res == 'move') {
+            if (this.flag) {
+				pixelData[x*4+(y*rowM)] = r;
+				pixelData[x*4+(y*rowM)+1] = g;
+				pixelData[x*4+(y*rowM)+2] = b;
+				ectx.putImageData(pixels, 0, 0);
+				this.draw(this.currentFrame);
+            }
+        }
         return 1;
     }
 }
@@ -146,6 +174,7 @@ class PWM extends Device {
         var holder = parent;
         this.element = document.createElement("div");
         this.element.setAttribute("id", id);
+		elem.setAttribute("class", "device");
         this.element.innerHTML =
         '  <p>Duty Cycle:</p>'+
         '  <input type="range" style="width:800px" min="0" max="1023" value="0" class="slider" id="'+id+'dty">'+
@@ -167,7 +196,6 @@ class PWM extends Device {
         }
     }
     draw(frame){
-        console.log("Frame ren: "+frame);
         this.currentFrame = frame;
         this.dutyelement = document.getElementById(this.id+'dty');
         this.freqelement = document.getElementById(this.id+'fre');
@@ -218,8 +246,15 @@ class DeviceManager {
         this.frames = parseInt(document.getElementById('frames').value);
         var type = parseInt(document.getElementById('type').value);
         var pin = parseInt(document.getElementById('pin').value);
-        var width= parseInt(document.getElementById('width').value);
-        var height= parseInt(document.getElementById('height').value);
+        var width= parseInt(document.getElementById('dwidth').value);
+        var height= parseInt(document.getElementById('dheight').value);
+        
+        var cliparea = [];
+        cliparea.x= parseInt(document.getElementById('clipx').value);
+        cliparea.y= parseInt(document.getElementById('clipy').value);
+        cliparea.w= parseInt(document.getElementById('clipw').value);
+        cliparea.h= parseInt(document.getElementById('cliph').value);
+        console.log(cliparea);
         var mn = document.getElementById('mainWindow');
         var dev;
         switch(type) {
@@ -241,17 +276,33 @@ class DeviceManager {
                 dev.type = type;
                 dev.pin = pin;
                 dev.datalength = (width*height)*3;
-                dev.createframes(this.frames, width, height);
-                 dev.canvas.addEventListener("mousedown", function(event) {
-                    var cords = getmouse(event);
-                    var hex = $("#full").spectrum("get")+"";
-                    dev.edit(cords.x, cords.y, hex)
-                 }, false);
+                dev.createframes(this.frames, width, height, cliparea);			
+				dev.canvas.addEventListener("mousemove", function (e) {
+					var cords = getmouse(event);
+					var hex = $("#full").spectrum("get")+"";
+					dev.edit(cords.x, cords.y, hex, 'move', e);
+				}, false);
+				dev.canvas.addEventListener("mousedown", function (e) {
+					var cords = getmouse(event);
+					var hex = $("#full").spectrum("get")+"";
+					dev.edit(cords.x, cords.y, hex, 'down', e);
+				}, false);
+				dev.canvas.addEventListener("mouseup", function (e) {
+					var cords = getmouse(event);
+					var hex = $("#full").spectrum("get")+"";
+					dev.edit(cords.x, cords.y, hex, 'up', e);
+				}, false);
+				dev.canvas.addEventListener("mouseout", function (e) {
+					var cords = getmouse(event);
+					var hex = $("#full").spectrum("get")+"";
+					dev.edit(cords.x, cords.y, hex, 'out', e);
+				}, false);
               break;
             default:
               break;
           }
     }
+	
     draw(frame){
         this.currentFrame = frame;
         this.devices.forEach(function(element) {
@@ -345,10 +396,18 @@ class DeviceManager {
     
 }
 
-var devman = new DeviceManager();
+
 //devman.addDevice();
+
 function addDevice(){
+    genframes = generateFrames();
     devman.addDevice();
+    devman.draw(0);
+    framedisplay(0);
+	$(".stpthr").css("display", "block");
+	$("#spcontainer").css("display", "block");
+	//$("#filename").val($.now);
+	positionPicker();
 }
 function framedisplay(frm){
     document.getElementById("framedisplay").innerHTML = frm+1;
@@ -363,4 +422,79 @@ function next(){
 }
 function sendframes(){
     devman.sendframes()
+}
+
+function setclipping(){
+genframes = generateFrames();
+var clippingdiv = document.createElement("div");
+clippingdiv.setAttribute('id', "clippingdiv")
+
+var gifcanvas = $('#gcanvas');
+var gpos = gifcanvas.position();
+
+clippingdiv.setAttribute('style', `
+position:absolute;
+top: `+(gpos.top-5)+`px;
+left: `+(gpos.left-5)+`px;
+width: `+(gifcanvas.width())+`px;
+height: `+(gifcanvas.height())+`px;
+border-color: black;
+border: 5px dashed;
+`);
+// Get the parent node
+var parentNode = document.querySelector('#gifpreview');
+// Insert the new node before the reference node
+parentNode.prepend(clippingdiv);
+
+var clipdiv = $('#clippingdiv');
+
+clipdiv.resizable({
+    handles: 'n,w,s,e',
+    minWidth: 1,
+    maxWidth: genframes[0].width,
+    maxHeight: genframes[0].height
+});
+clipdiv.resize(function(event) {
+    var clipbox = $(event.target);
+    var gifcanvas = $('#gcanvas');
+    var gpos = gifcanvas.position();
+    var cpos = clipbox.position();
+    
+    var cord = [];
+    cord.x = cpos.left-gpos.left+5;
+    cord.y = cpos.top-gpos.top+5;
+    cord.w = clipbox.width();
+    cord.h = clipbox.height();
+    
+    if(cord.x<0){
+        cord.x = 0;
+    }else if(cord.x>gifcanvas.width()){
+        cord.x = gifcanvas.width();
+    }
+    if(cord.y<0){
+        cord.y = 0;
+    }else if(cord.y-10>gifcanvas.height()){
+        cord.y = gifcanvas.height()-1;
+    }
+    if(cord.x+cord.w>gifcanvas.width()){
+        cord.w = gifcanvas.width()-cord.x;
+    }
+    if(cord.y+clipbox.height()-10>gifcanvas.height()){
+        cord.h = gifcanvas.height()-cord.y;
+    }
+    clipbox.offset({
+        left: gpos.left+cord.x-5,
+        top: gpos.top+cord.y-5
+      });
+    clipbox.width(cord.w);
+    clipbox.height(cord.h);
+    $('#clipx').val(Math.round(cord.x));
+    $('#clipy').val(Math.round(cord.y));
+    $('#clipw').val(Math.round(cord.w));
+    $('#cliph').val(Math.round(cord.h));
+    //mWid = $('#c').width()-(cpos.left-gpos.left+5);
+    //mHei = $('#c').height()-(cpos.top-gpos.top+5);
+    //$('#clippingdiv').resizable( "option", "maxWidth", mWid );
+    //$('#clippingdiv').resizable( "option", "maxHeight", mHei );
+  });
 }

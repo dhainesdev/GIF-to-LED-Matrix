@@ -19,8 +19,8 @@ from machine import Pin, SPI
 #gc.collect()
 
 def connectwifi():
-  ssid = 'ChangeMe'
-  password = 'ChangeMe'
+  ssid = 'CHANGEME'
+  password = 'CHANGEME'
 
   sta_if = network.WLAN(network.STA_IF); sta_if.active(True)
   sta_if.scan()                             # Scan for available access points
@@ -48,3 +48,4 @@ if modulename not in sys.modules:
     connectwifi()
     mountsd()
 
+import led_web

@@ -255,8 +255,8 @@ See http://bgrins.github.io/spectrum/themes/ for instructions.
 
 .sp-container {
     border-radius: 0;
-    background-color: #ECECEC;
-    border: solid 1px #f0c49B;
+    /*background-color: #ECECEC;
+    border: solid 1px #f0c49B;*/
     padding: 0;
 }
 .sp-container, .sp-container button, .sp-container input, .sp-color, .sp-hue, .sp-clear {
@@ -293,7 +293,7 @@ See http://bgrins.github.io/spectrum/themes/ for instructions.
    color: #222;
 }
 .sp-input:focus  {
-    border: 1px solid orange;
+    /*border: 1px solid orange;*/
 }
 .sp-input.sp-validation-error {
     border: 1px solid red;
@@ -313,7 +313,7 @@ See http://bgrins.github.io/spectrum/themes/ for instructions.
 
 /* Palettes */
 .sp-palette-container {
-    border-right: solid 1px #ccc;
+    /*border-right: solid 1px #ccc;*/
 }
 
 .sp-palette-only .sp-palette-container {
@@ -331,7 +331,7 @@ See http://bgrins.github.io/spectrum/themes/ for instructions.
     border:solid 2px transparent;
 }
 .sp-palette .sp-thumb-el:hover, .sp-palette .sp-thumb-el.sp-thumb-active {
-    border-color: orange;
+    /*border-color: orange;*/
 }
 .sp-thumb-el {
     position:relative;
@@ -343,7 +343,7 @@ See http://bgrins.github.io/spectrum/themes/ for instructions.
     border: solid 1px #333;
 }
 .sp-initial span {
-    width: 30px;
+    width: 60px;
     height: 25px;
     border:none;
     display:block;

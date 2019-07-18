@@ -91,12 +91,6 @@
 
         return [
             "<div class='sp-container sp-hidden'>",
-                "<div class='sp-palette-container'>",
-                    "<div class='sp-palette sp-thumb sp-cf'></div>",
-                    "<div class='sp-palette-button-container sp-cf'>",
-                        "<button type='button' class='sp-palette-toggle'></button>",
-                    "</div>",
-                "</div>",
                 "<div class='sp-picker-container'>",
                     "<div class='sp-top sp-cf'>",
                         "<div class='sp-fill'></div>",
@@ -122,8 +116,12 @@
                     "</div>",
                     "<div class='sp-initial sp-thumb sp-cf'></div>",
                     "<div class='sp-button-container sp-cf'>",
-                        "<a class='sp-cancel' href='#'></a>",
-                        "<button type='button' class='sp-choose'></button>",
+                    "</div>",
+                "</div>",
+				"<div class='sp-palette-container'>",
+                    "<div class='sp-palette sp-thumb sp-cf'></div>",
+                    "<div class='sp-palette-button-container sp-cf'>",
+                        "<button type='button' class='sp-palette-toggle'></button>",
                     "</div>",
                 "</div>",
             "</div>"
@@ -554,7 +552,7 @@
             if (opts.showInitial) {
                 var initial = colorOnShow;
                 var current = get();
-                initialColorContainer.html(paletteTemplate([initial, current], current, "sp-palette-row-initial", opts));
+                initialColorContainer.html(paletteTemplate([current], current, "sp-palette-row-initial", opts));
             }
         }
 

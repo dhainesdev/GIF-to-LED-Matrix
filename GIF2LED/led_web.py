@@ -7,6 +7,11 @@ from math import floor
 import os
 from time import sleep
 
+play=0
+playfile = "autoplay"
+framelength = 0
+delay = 0
+
 def sdsettup():
     from boot import mountsd
     mountsd()
@@ -22,72 +27,6 @@ def sdcheck():
 sdcheck()
 collect()
 
-
-play=0
-playfile = "autoplay"
-framelength=0
-delay = 0
-
-pwmdevs = []
-class PWNPlayer:
-    global pwmdevs
-    count = 0
-    def __init__(self, pin):
-        self.pin = pin
-        self.count
-        pwmdevs.append(PWM(Pin(self.pin)))
-        self.id = self.count
-        print(pwmdevs[self.count])
-        self.count+=1
-        print("class")
-        self.ilength = 5
-    def out(self, output):
-        print(output)
-        try:
-            #first 12 bits
-            sduty = int.from_bytes(output[3:5], 'big', False)&1023
-            #last 28 bits
-            sfreq = int.from_bytes(output[:4], 'big', False)>>4
-            print("f: "+str(sfreq))
-            print("d: "+str(sduty))
-            pwmdevs[self.id].freq(sfreq)
-            pwmdevs[self.id].duty(sduty)
-        except:
-            print("conversion failed")
-    def de(self):
-        return pwmdevs[self.id]
-
-
-# pwm = []
-# pwm.append(PWNPlayer(26))
-# #pwm[0].out(b'\x00\xF0\x00\x0F\xFF')
-# sleep(8)
-# pwm[0].out(b'\x00\x00\x00\x00\x00')
-# # sleep(8)
-# print(pwm[0])
-# pwm[0].de().deinit()
-
-
-#PWNPlayer(27)
-#PWNPlayer(8)
-#PWNPlayer(9)
-
-print("testing")
-#26,27,32,33
-t = PWNPlayer(26)
-tt = PWNPlayer(27)
-sleep(8)
-# t.out(b'\x00\x0f\x00\x0f\xff')
-# sleep(8)
-# t.out(b'\x00\x00\x00\x00\x00')
-# sleep(8)
-# tt.out(b'\x00\x0f\x00\x0f\xff')
-# sleep(8)
-# tt.out(b'\x00\x00\x00\x00\x00')
-t.de().deinit()
-tt.de().deinit()
-print("done")
-
 class NeoPixelPlayer:
     def __init__(self, pin, nlength):
         self.nlength = nlength
@@ -100,7 +39,6 @@ class NeoPixelPlayer:
 
 def classpick(argument, a1, a2):
     picker = {
-        1: PWNPlayer(a1),
         2: NeoPixelPlayer(a1, a2)
     }
     return picker.get(argument)
@@ -126,9 +64,9 @@ class Player:
             datalength  = int(lines[i+2])
             handler = classpick(devicetype, pin, datalength)
             self.devices.append(handler)
-            print("player")
-            print(handler)
-            print("Device added, Type: "+ str(devicetype) + " Pin: " + str(pin)+ " Datalength: " + str(datalength))
+            print("Playback Started")
+            #print(handler)
+            print("Device Configured, Type: "+ str(devicetype) + " Pin: " + str(pin)+ " Datalength: " + str(datalength))
     
     def render(self):
         for x in range(self.devicecount):
@@ -157,9 +95,8 @@ def animation():
     dat.close()
   except:
     play = 3
-    print("/sd/"+playfile+"/"+" failed to open playback file(s)")
-    _thread.exit()
-  print("Playing")
+    print("Failed to open playback file "+"/sd/"+playfile)
+  print("Starting Playback")
   try:
     fileplay = Player(playfile)
     while play:
@@ -167,10 +104,8 @@ def animation():
     fileplay.close()
   except:
       print("Playback failed")
-  print("Playing ended")
+  print("Stopped Playback")
   play = 3
-
-# ----------------------------------------------------------------------------
 
 def _acceptWebSocketCallback(webSocket, httpClient) :
     print("WS Connected")
@@ -206,12 +141,20 @@ def _recvTextCallback(webSocket, content) :
             filename = lines[1]
         except:
             print("failed to parse info")
-        print("new")
+        try:
+            os.remove("/sd/"+filename+"/cfg.dat")
+            os.remove("/sd/"+filename+"/dat.dat")
+            os.rmdir("/sd/"+filename)
+            print("File with that name found, removing: "+filename)
+        except:
+            print("Creating new file: "+filename)
+            pass
         try:
             os.mkdir("/sd/"+filename)
         except:
             print("Failed to create folder")
             pass
+
         print("Creating config")
         cfg = open("/sd/"+filename+"/cfg.dat",'w')
         #write data to file excluding 'S' and filename
@@ -238,12 +181,17 @@ def _closedCallback(webSocket) :
     print("WS Closed, now play")
     animation()
 
-# ----------------------------------------------------------------------------
-
+# ------------------[Start Server]--------------------------------------------
+print("Start Server")
 srv = MicroWebSrv(webPath='www/')
 srv.MaxWebSocketRecvLen     = 512
-srv.WebSocketThreaded		= True
+#srv.WebSocketThreaded		= True
 srv.AcceptWebSocketCallback = _acceptWebSocketCallback
-srv.Start()
+srv.Start(threaded=True)
 
+# ----------------------------------------------------------------------------
+
+# ------------------[Auto Play]-----------------------------------------------
+print("Auto Play")
+animation()
 # ----------------------------------------------------------------------------
